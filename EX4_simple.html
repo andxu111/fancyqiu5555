@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第5章：Matplotlib 子图与布局练习题 - 徐秋莲</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 10px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.2em;
+        }
+        .student-info {
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+        .exercise {
+            margin: 30px 0;
+            padding: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        .exercise h2 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .chart-row {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .chart-box {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .chart-box h3 {
+            margin: 0 0 15px 0;
+            color: #2c3e50;
+            text-align: center;
+            font-size: 1.1em;
+        }
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+        .controls {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .controls h4 {
+            margin: 0 0 10px 0;
+            color: #2c3e50;
+            font-size: 1em;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+        }
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        .btn-success {
+            background: #2ecc71;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        .btn-warning {
+            background: #f39c12;
+            color: white;
+        }
+        .btn-warning:hover {
+            background: #e67e22;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin: 10px 0;
+        }
+        .input-group label {
+            min-width: 80px;
+            font-weight: bold;
+        }
+        .input-group input {
+            flex: 1;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+            font-size: 14px;
+        }
+        .description {
+            background: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>第5章：Matplotlib 子图与布局练习题</h1>
+            <div class="student-info">姓名：徐秋莲 | 学号：022340507</div>
+        </div>
+
+        <div class="exercise">
+            <h2>练习 1：plt.subplot() 基础</h2>
+            <div class="description">
+                <p><strong>题目描述：</strong>使用plt.subplot()创建上下两个子图，分别展示智能手表和蓝牙耳机的季度销量数据。</p>
+            </div>
+            <div class="controls">
+                <h4>数据控制面板</h4>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateWatchData()">更新智能手表数据</button>
+                    <button class="btn btn-success" onclick="updateHeadsetData()">更新耳机数据</button>
+                    <button class="btn btn-warning" onclick="randomizeQuarterlyData()">随机季度数据</button>
+                </div>
+                <div class="input-group">
+                    <label>季度标签:</label>
+                    <input type="text" id="quarterLabels" value="第一季度,第二季度,第三季度,第四季度" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateQuarterLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>智能手表数据:</label>
+                    <input type="text" id="watchDataInput" value="120,150,130,180" placeholder="用逗号分隔4个数值">
+                    <button class="btn btn-primary" onclick="updateWatchDataFromInput()">应用数据</button>
+                </div>
+                <div class="input-group">
+                    <label>耳机数据:</label>
+                    <input type="text" id="headsetDataInput" value="200,180,220,250" placeholder="用逗号分隔4个数值">
+                    <button class="btn btn-primary" onclick="updateHeadsetDataFromInput()">应用数据</button>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h3>智能手表季度销量</h3>
+                    <div class="chart-container">
+                        <canvas id="watchChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>蓝牙耳机季度销量</h3>
+                    <div class="chart-container">
+                        <canvas id="headsetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exercise">
+            <h2>练习 2：plt.subplots() 与坐标轴共享</h2>
+            <div class="description">
+                <p><strong>题目描述：</strong>创建共享Y轴的左右两个子图，对比不同社交平台的男女用户比例。</p>
+            </div>
+            <div class="controls">
+                <h4>数据控制面板</h4>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateMaleData()">更新男性数据</button>
+                    <button class="btn btn-success" onclick="updateFemaleData()">更新女性数据</button>
+                    <button class="btn btn-warning" onclick="swapGenderData()">交换数据</button>
+                </div>
+                <div class="input-group">
+                    <label>平台名称:</label>
+                    <input type="text" id="platformLabels" value="微博,B站,抖音,小红书,知乎" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updatePlatformLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>男性数据:</label>
+                    <input type="text" id="maleDataInput" value="55,45,50,30,60" placeholder="用逗号分隔5个数值">
+                    <button class="btn btn-primary" onclick="updateMaleDataFromInput()">应用数据</button>
+                </div>
+                <div class="input-group">
+                    <label>女性数据:</label>
+                    <input type="text" id="femaleDataInput" value="45,55,50,70,40" placeholder="用逗号分隔5个数值">
+                    <button class="btn btn-primary" onclick="updateFemaleDataFromInput()">应用数据</button>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h3>各平台男性用户（百万）</h3>
+                    <div class="chart-container">
+                        <canvas id="maleChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>各平台女性用户（百万）</h3>
+                    <div class="chart-container">
+                        <canvas id="femaleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exercise">
+            <h2>练习 3：plt.subplot2grid() 非对称布局</h2>
+            <div class="description">
+                <p><strong>题目描述：</strong>创建2x2的非对称布局，显示网站流量分析数据。</p>
+            </div>
+            <div class="controls">
+                <h4>练习3：数据控制面板</h4>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateTrafficData()">更新流量数据</button>
+                    <button class="btn btn-success" onclick="randomizeTrafficData()">随机流量数据</button>
+                    <button class="btn btn-warning" onclick="swapTrafficData()">交换年份数据</button>
+                </div>
+                <div class="input-group">
+                    <label>来源标签:</label>
+                    <input type="text" id="trafficLabels" value="直接访问,搜索引擎,社交媒体,推荐链接" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateTrafficLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>月份标签:</label>
+                    <input type="text" id="visitLabels" value="一月,二月,三月,四月,五月,六月" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateVisitLabels()">更新标签</button>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box" style="flex: 0.4;">
+                    <h3>2023年流量来源</h3>
+                    <div class="chart-container">
+                        <canvas id="traffic2023"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box" style="flex: 0.6;">
+                    <h3>月度访问量趋势</h3>
+                    <div class="chart-container">
+                        <canvas id="visitsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box" style="flex: 0.4;">
+                    <h3>2024年流量来源</h3>
+                    <div class="chart-container">
+                        <canvas id="traffic2024"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="exercise">
+            <h2>练习 4：ax.twinx() 双坐标轴</h2>
+            <div class="description">
+                <p><strong>题目描述：</strong>使用双坐标轴展示股票月度价格与成交量的关系。</p>
+            </div>
+            <div class="controls">
+                <h4>练习4：数据控制面板</h4>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateStockData()">更新股票数据</button>
+                    <button class="btn btn-success" onclick="randomizeStockData()">随机股票数据</button>
+                    <button class="btn btn-warning" onclick="resetStockData()">重置数据</button>
+                </div>
+                <div class="input-group">
+                    <label>月份标签:</label>
+                    <input type="text" id="monthLabels" value="一月,二月,三月,四月,五月,六月" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateMonthLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>成交量数据:</label>
+                    <input type="text" id="volumeDataInput" value="1.2,1.5,2.0,1.8,2.5,3.0" placeholder="用逗号分隔6个数值">
+                    <button class="btn btn-primary" onclick="updateVolumeDataFromInput()">应用成交量</button>
+                </div>
+                <div class="input-group">
+                    <label>股价数据:</label>
+                    <input type="text" id="priceDataInput" value="100,105,115,110,120,135" placeholder="用逗号分隔6个数值">
+                    <button class="btn btn-primary" onclick="updatePriceDataFromInput()">应用股价</button>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>股票月度价格与成交量</h3>
+                <div class="chart-container" style="height: 400px;">
+                    <canvas id="stockChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="exercise">
+            <h2>练习 5：GridSpec 自定义布局</h2>
+            <div class="description">
+                <p><strong>题目描述：</strong>使用GridSpec创建自定义布局，展示大学年度招生情况。</p>
+            </div>
+            <div class="controls">
+                <h4>练习5：数据控制面板</h4>
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="updateEnrollmentTotal()">更新总招生数据</button>
+                    <button class="btn btn-success" onclick="updateEnrollmentBreakdown()">更新学院数据</button>
+                    <button class="btn btn-warning" onclick="randomizeEnrollmentData()">随机招生数据</button>
+                    <button class="btn btn-danger" onclick="redistributeEnrollment()">重新分配数据</button>
+                </div>
+                <div class="input-group">
+                    <label>学院名称:</label>
+                    <input type="text" id="collegeLabels" value="工学院,文学院,商学院,理学院" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateCollegeLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>年份标签:</label>
+                    <input type="text" id="yearLabels" value="2021年,2022年,2023年,2024年" placeholder="用逗号分隔">
+                    <button class="btn btn-primary" onclick="updateYearLabels()">更新标签</button>
+                </div>
+                <div class="input-group">
+                    <label>总招生数据:</label>
+                    <input type="text" id="totalDataInput" value="20000,21500,23000,24000" placeholder="用逗号分隔4个数值">
+                    <button class="btn btn-primary" onclick="updateTotalDataFromInput()">应用数据</button>
+                </div>
+                <div class="input-group">
+                    <label>学院数据:</label>
+                    <input type="text" id="collegeDataInput" value="8000,5000,6000,4000" placeholder="用逗号分隔4个数值">
+                    <button class="btn btn-primary" onclick="updateCollegeDataFromInput()">应用数据</button>
+                </div>
+            </div>
+            <div class="chart-box">
+                <h3>大学年度总招生趋势</h3>
+                <div class="chart-container" style="height: 300px;">
+                    <canvas id="enrollmentTotal"></canvas>
+                </div>
+            </div>
+            <div class="chart-row">
+                <div class="chart-box">
+                    <h3>各学院招生分布</h3>
+                    <div class="chart-container">
+                        <canvas id="enrollmentPie"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h3>各学院招生人数</h3>
+                    <div class="chart-container">
+                        <canvas id="enrollmentBar"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 检查Chart.js是否加载成功
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js未加载成功');
+            alert('图表库加载失败，请检查网络连接');
+        } else {
+            console.log('Chart.js加载成功，开始创建图表');
+            
+            // 全局变量存储图表实例
+            let watchChart, headsetChart, maleChart, femaleChart, stockChart;
+            let traffic2023, traffic2024, visitsChart, enrollmentTotal, enrollmentPie, enrollmentBar;
+
+            // 互动功能函数
+            function updateWatchData() {
+                const newData = [
+                    Math.floor(Math.random() * 100) + 100,
+                    Math.floor(Math.random() * 100) + 100,
+                    Math.floor(Math.random() * 100) + 100,
+                    Math.floor(Math.random() * 100) + 100
+                ];
+                watchChart.data.datasets[0].data = newData;
+                watchChart.update();
+            }
+
+            function updateHeadsetData() {
+                const newData = [
+                    Math.floor(Math.random() * 100) + 150,
+                    Math.floor(Math.random() * 100) + 150,
+                    Math.floor(Math.random() * 100) + 150,
+                    Math.floor(Math.random() * 100) + 150
+                ];
+                headsetChart.data.datasets[0].data = newData;
+                headsetChart.update();
+            }
+
+            function randomizeQuarterlyData() {
+                // 移除随机数据生成，保持当前数据不变
+                console.log('随机数据功能已移除，保持当前数据');
+            }
+
+            function updateQuarterLabels() {
+                const labels = document.getElementById('quarterLabels').value.split(',');
+                watchChart.data.labels = labels;
+                headsetChart.data.labels = labels;
+                watchChart.update();
+                headsetChart.update();
+            }
+
+            function updateMaleData() {
+                const newData = [
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30
+                ];
+                maleChart.data.datasets[0].data = newData;
+                maleChart.update();
+            }
+
+            function updateFemaleData() {
+                const newData = [
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30,
+                    Math.floor(Math.random() * 40) + 30
+                ];
+                femaleChart.data.datasets[0].data = newData;
+                femaleChart.update();
+            }
+
+            function swapGenderData() {
+                const maleData = [...maleChart.data.datasets[0].data];
+                const femaleData = [...femaleChart.data.datasets[0].data];
+                maleChart.data.datasets[0].data = femaleData;
+                femaleChart.data.datasets[0].data = maleData;
+                maleChart.update();
+                femaleChart.update();
+            }
+
+            function updatePlatformLabels() {
+                const labels = document.getElementById('platformLabels').value.split(',');
+                maleChart.data.labels = labels;
+                femaleChart.data.labels = labels;
+                maleChart.update();
+                femaleChart.update();
+            }
+
+            function updateStockData() {
+                const newVolume = [
+                    (Math.random() * 2 + 1).toFixed(1),
+                    (Math.random() * 2 + 1).toFixed(1),
+                    (Math.random() * 2 + 1).toFixed(1),
+                    (Math.random() * 2 + 1).toFixed(1),
+                    (Math.random() * 2 + 1).toFixed(1),
+                    (Math.random() * 2 + 1).toFixed(1)
+                ];
+                const newPrice = [
+                    Math.floor(Math.random() * 40) + 90,
+                    Math.floor(Math.random() * 40) + 90,
+                    Math.floor(Math.random() * 40) + 90,
+                    Math.floor(Math.random() * 40) + 90,
+                    Math.floor(Math.random() * 40) + 90,
+                    Math.floor(Math.random() * 40) + 90
+                ];
+                stockChart.data.datasets[0].data = newVolume;
+                stockChart.data.datasets[1].data = newPrice;
+                stockChart.update();
+            }
+
+            function randomizeStockData() {
+                updateStockData();
+            }
+
+            function resetStockData() {
+                stockChart.data.datasets[0].data = [1.2, 1.5, 2.0, 1.8, 2.5, 3.0];
+                stockChart.data.datasets[1].data = [100, 105, 115, 110, 120, 135];
+                stockChart.update();
+            }
+
+            function updateMonthLabels() {
+                const labels = document.getElementById('monthLabels').value.split(',');
+                stockChart.data.labels = labels;
+                stockChart.update();
+            }
+
+            // 练习3：流量数据更新函数
+            function updateTrafficData() {
+                const new2023Data = [
+                    Math.floor(Math.random() * 20) + 15,
+                    Math.floor(Math.random() * 20) + 30,
+                    Math.floor(Math.random() * 20) + 25,
+                    Math.floor(Math.random() * 20) + 10
+                ];
+                const new2024Data = [
+                    Math.floor(Math.random() * 20) + 10,
+                    Math.floor(Math.random() * 20) + 25,
+                    Math.floor(Math.random() * 20) + 35,
+                    Math.floor(Math.random() * 20) + 5
+                ];
+                traffic2023.data.datasets[0].data = new2023Data;
+                traffic2024.data.datasets[0].data = new2024Data;
+                traffic2023.update();
+                traffic2024.update();
+            }
+
+            function randomizeTrafficData() {
+                updateTrafficData();
+            }
+
+            function swapTrafficData() {
+                const data2023 = [...traffic2023.data.datasets[0].data];
+                const data2024 = [...traffic2024.data.datasets[0].data];
+                traffic2023.data.datasets[0].data = data2024;
+                traffic2024.data.datasets[0].data = data2023;
+                traffic2023.update();
+                traffic2024.update();
+            }
+
+            function updateTrafficLabels() {
+                const labels = document.getElementById('trafficLabels').value.split(',');
+                traffic2023.data.labels = labels;
+                traffic2024.data.labels = labels;
+                traffic2023.update();
+                traffic2024.update();
+            }
+
+            function updateVisitLabels() {
+                const labels = document.getElementById('visitLabels').value.split(',');
+                visitsChart.data.labels = labels;
+                visitsChart.update();
+            }
+
+            // 练习5：招生数据更新函数
+            function updateEnrollmentTotal() {
+                const newData = [
+                    Math.floor(Math.random() * 5000) + 18000,
+                    Math.floor(Math.random() * 5000) + 20000,
+                    Math.floor(Math.random() * 5000) + 22000,
+                    Math.floor(Math.random() * 5000) + 23000
+                ];
+                enrollmentTotal.data.datasets[0].data = newData;
+                enrollmentTotal.update();
+            }
+
+            function updateEnrollmentBreakdown() {
+                const newData = [
+                    Math.floor(Math.random() * 3000) + 6000,
+                    Math.floor(Math.random() * 3000) + 3000,
+                    Math.floor(Math.random() * 3000) + 5000,
+                    Math.floor(Math.random() * 3000) + 2000
+                ];
+                enrollmentPie.data.datasets[0].data = newData;
+                enrollmentBar.data.datasets[0].data = newData;
+                enrollmentPie.update();
+                enrollmentBar.update();
+            }
+
+            function randomizeEnrollmentData() {
+                updateEnrollmentTotal();
+                updateEnrollmentBreakdown();
+            }
+
+            function redistributeEnrollment() {
+                const total = 24000;
+                const newData = [
+                    Math.floor(Math.random() * total * 0.5) + total * 0.2,
+                    Math.floor(Math.random() * total * 0.3) + total * 0.1,
+                    Math.floor(Math.random() * total * 0.3) + total * 0.15,
+                    Math.floor(Math.random() * total * 0.2) + total * 0.1
+                ];
+                enrollmentPie.data.datasets[0].data = newData;
+                enrollmentBar.data.datasets[0].data = newData;
+                enrollmentPie.update();
+                enrollmentBar.update();
+            }
+
+            function updateCollegeLabels() {
+                const labels = document.getElementById('collegeLabels').value.split(',');
+                enrollmentPie.data.labels = labels;
+                enrollmentBar.data.labels = labels;
+                enrollmentPie.update();
+                enrollmentBar.update();
+            }
+
+            function updateYearLabels() {
+                const labels = document.getElementById('yearLabels').value.split(',');
+                enrollmentTotal.data.labels = labels;
+                enrollmentTotal.update();
+            }
+
+            // 数据输入应用函数
+            function updateWatchDataFromInput() {
+                const input = document.getElementById('watchDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 4 && data.every(val => !isNaN(val))) {
+                    watchChart.data.datasets[0].data = data;
+                    watchChart.update();
+                } else {
+                    alert('请输入4个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateHeadsetDataFromInput() {
+                const input = document.getElementById('headsetDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 4 && data.every(val => !isNaN(val))) {
+                    headsetChart.data.datasets[0].data = data;
+                    headsetChart.update();
+                } else {
+                    alert('请输入4个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateMaleDataFromInput() {
+                const input = document.getElementById('maleDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 5 && data.every(val => !isNaN(val))) {
+                    maleChart.data.datasets[0].data = data;
+                    maleChart.update();
+                } else {
+                    alert('请输入5个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateFemaleDataFromInput() {
+                const input = document.getElementById('femaleDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 5 && data.every(val => !isNaN(val))) {
+                    femaleChart.data.datasets[0].data = data;
+                    femaleChart.update();
+                } else {
+                    alert('请输入5个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateVolumeDataFromInput() {
+                const input = document.getElementById('volumeDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 6 && data.every(val => !isNaN(val))) {
+                    stockChart.data.datasets[0].data = data;
+                    stockChart.update();
+                } else {
+                    alert('请输入6个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updatePriceDataFromInput() {
+                const input = document.getElementById('priceDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 6 && data.every(val => !isNaN(val))) {
+                    stockChart.data.datasets[1].data = data;
+                    stockChart.update();
+                } else {
+                    alert('请输入6个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateTotalDataFromInput() {
+                const input = document.getElementById('totalDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 4 && data.every(val => !isNaN(val))) {
+                    enrollmentTotal.data.datasets[0].data = data;
+                    enrollmentTotal.update();
+                } else {
+                    alert('请输入4个有效的数值，用逗号分隔');
+                }
+            }
+
+            function updateCollegeDataFromInput() {
+                const input = document.getElementById('collegeDataInput').value;
+                const data = input.split(',').map(val => parseFloat(val.trim()));
+                if (data.length === 4 && data.every(val => !isNaN(val))) {
+                    enrollmentPie.data.datasets[0].data = data;
+                    enrollmentBar.data.datasets[0].data = data;
+                    enrollmentPie.update();
+                    enrollmentBar.update();
+                } else {
+                    alert('请输入4个有效的数值，用逗号分隔');
+                }
+            }
+            
+            // 设置中文字体
+            Chart.defaults.font.family = "'Microsoft YaHei', Arial, sans-serif";
+            
+            // 练习1：智能手表销量
+            const watchCtx = document.getElementById('watchChart');
+            if (watchCtx) {
+                watchChart = new Chart(watchCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['第一季度', '第二季度', '第三季度', '第四季度'],
+                        datasets: [{
+                            label: '销量',
+                            data: [120, 150, 130, 180],
+                            backgroundColor: '#3498db',
+                            borderColor: '#2980b9',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '销量 (万台)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习1：蓝牙耳机销量
+            const headsetCtx = document.getElementById('headsetChart');
+            if (headsetCtx) {
+                headsetChart = new Chart(headsetCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['第一季度', '第二季度', '第三季度', '第四季度'],
+                        datasets: [{
+                            label: '销量',
+                            data: [200, 180, 220, 250],
+                            backgroundColor: '#2ecc71',
+                            borderColor: '#27ae60',
+                            borderWidth: 2,
+                            pointRadius: 6,
+                            pointStyle: 'rect'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '销量 (万台)'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: '季度'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习2：男性用户
+            const maleCtx = document.getElementById('maleChart');
+            if (maleCtx) {
+                maleChart = new Chart(maleCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['微博', 'B站', '抖音', '小红书', '知乎'],
+                        datasets: [{
+                            label: '男性用户',
+                            data: [55, 45, 50, 30, 60],
+                            backgroundColor: '#3498db'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 80,
+                                title: {
+                                    display: true,
+                                    text: '用户数 (百万)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习2：女性用户
+            const femaleCtx = document.getElementById('femaleChart');
+            if (femaleCtx) {
+                femaleChart = new Chart(femaleCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['微博', 'B站', '抖音', '小红书', '知乎'],
+                        datasets: [{
+                            label: '女性用户',
+                            data: [45, 55, 50, 70, 40],
+                            backgroundColor: '#e74c3c'
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                max: 80,
+                                title: {
+                                    display: true,
+                                    text: '用户数 (百万)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习3：2023年流量来源
+            const traffic2023Ctx = document.getElementById('traffic2023');
+            if (traffic2023Ctx) {
+                traffic2023 = new Chart(traffic2023Ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['直接访问', '搜索引擎', '社交媒体', '推荐链接'],
+                        datasets: [{
+                            data: [20, 40, 30, 10],
+                            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 练习3：2024年流量来源
+            const traffic2024Ctx = document.getElementById('traffic2024');
+            if (traffic2024Ctx) {
+                traffic2024 = new Chart(traffic2024Ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['直接访问', '搜索引擎', '社交媒体', '推荐链接'],
+                        datasets: [{
+                            data: [15, 35, 40, 10],
+                            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 练习3：月度访问量
+            const visitsCtx = document.getElementById('visitsChart');
+            if (visitsCtx) {
+                visitsChart = new Chart(visitsCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['一月', '二月', '三月', '四月', '五月', '六月'],
+                        datasets: [{
+                            label: '访问量',
+                            data: [1.5, 1.8, 2.2, 2.0, 2.5, 2.8],
+                            backgroundColor: '#9b59b6'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '访问量 (百万)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习4：双坐标轴股票图表
+            const stockCtx = document.getElementById('stockChart');
+            if (stockCtx) {
+                stockChart = new Chart(stockCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['一月', '二月', '三月', '四月', '五月', '六月'],
+                        datasets: [{
+                            label: '成交量 (百万股)',
+                            data: [1.2, 1.5, 2.0, 1.8, 2.5, 3.0],
+                            backgroundColor: 'rgba(52, 152, 219, 0.7)',
+                            yAxisID: 'y'
+                        }, {
+                            type: 'line',
+                            label: '股价 (元)',
+                            data: [100, 105, 115, 110, 120, 135],
+                            borderColor: '#e74c3c',
+                            backgroundColor: '#e74c3c',
+                            borderWidth: 2,
+                            pointRadius: 6,
+                            yAxisID: 'y1'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                title: {
+                                    display: true,
+                                    text: '成交量 (百万股)'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                title: {
+                                    display: true,
+                                    text: '股价 (元)'
+                                },
+                                grid: {
+                                    drawOnChartArea: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习5：年度总招生
+            const enrollmentTotalCtx = document.getElementById('enrollmentTotal');
+            if (enrollmentTotalCtx) {
+                enrollmentTotal = new Chart(enrollmentTotalCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['2021年', '2022年', '2023年', '2024年'],
+                        datasets: [{
+                            label: '年度总招生',
+                            data: [20000, 21500, 23000, 24000],
+                            borderColor: '#3498db',
+                            backgroundColor: '#3498db',
+                            borderWidth: 2,
+                            pointRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                title: {
+                                    display: true,
+                                    text: '招生人数'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 练习5：各学院饼图
+            const enrollmentPieCtx = document.getElementById('enrollmentPie');
+            if (enrollmentPieCtx) {
+                enrollmentPie = new Chart(enrollmentPieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['工学院', '文学院', '商学院', '理学院'],
+                        datasets: [{
+                            data: [8000, 5000, 6000, 4000],
+                            backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+            }
+
+            // 练习5：各学院条形图
+            const enrollmentBarCtx = document.getElementById('enrollmentBar');
+            if (enrollmentBarCtx) {
+                enrollmentBar = new Chart(enrollmentBarCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['工学院', '文学院', '商学院', '理学院'],
+                        datasets: [{
+                            label: '招生人数',
+                            data: [8000, 5000, 6000, 4000],
+                            backgroundColor: '#2ecc71'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: '招生人数'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
